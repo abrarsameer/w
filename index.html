@@ -1,0 +1,666 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);color:var(--text-primary);background:transparent}
+.container{max-width:100%;padding:0 0 24px 0}
+.header{background:linear-gradient(135deg,#C04828,#8B2FC9);padding:20px 24px;border-radius:12px;margin-bottom:16px;color:#fff}
+.header h1{font-size:22px;font-weight:500;margin-bottom:4px}
+.header p{font-size:13px;opacity:.85}
+.search-wrap{position:relative;margin-bottom:16px}
+.search-wrap input{width:100%;padding:10px 16px 10px 40px;border:1px solid var(--border);border-radius:8px;background:var(--surface-1);color:var(--text-primary);font-size:14px;outline:none}
+.search-wrap input:focus{border-color:var(--border-accent)}
+.search-wrap i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:16px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.tab{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface-1);color:var(--text-secondary);font-size:12px;cursor:pointer;transition:all .15s}
+.tab:hover,.tab.active{background:var(--bg-accent);border-color:var(--border-accent);color:var(--text-accent)}
+.section{display:none}
+.section.active,.section.search-visible{display:block}
+.section-title{font-size:18px;font-weight:500;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.section-title i{margin-right:8px;font-size:16px;color:var(--text-accent)}
+.card{background:var(--surface-1);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
+.card h3{font-size:14px;font-weight:500;margin-bottom:8px;color:var(--text-primary)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:7px 10px;background:var(--surface-0);color:var(--text-secondary);font-weight:500;border-bottom:2px solid var(--border)}
+td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface-0)}
+code{background:var(--surface-0);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-family:var(--font-mono);font-size:12px;color:var(--text-accent)}
+.note{background:var(--bg-warning);border:1px solid var(--border-warning);border-radius:8px;padding:10px 14px;margin:10px 0;font-size:13px;color:var(--text-warning)}
+.note i{margin-right:6px}
+.example-block{background:var(--surface-0);border:1px solid var(--border);border-radius:8px;padding:12px;margin:10px 0;font-size:12px;font-family:var(--font-mono);line-height:1.7;color:var(--text-primary)}
+.tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500;margin:2px 2px 2px 0}
+.tag-admin{background:var(--bg-warning);color:var(--text-warning)}
+.tag-user{background:var(--bg-success);color:var(--text-success)}
+.tag-owner{background:var(--bg-danger);color:var(--text-danger)}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;border:1px solid var(--border)}
+.empty{text-align:center;padding:40px;color:var(--text-muted)}
+.all-cmds{display:none}
+.search-mode .section{display:none}
+.search-mode .all-cmds{display:block}
+.cmd-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.cmd-row:last-child{border-bottom:none}
+.cmd-name{min-width:220px;font-family:var(--font-mono);font-size:12px;color:var(--text-accent)}
+.cmd-desc{font-size:13px;color:var(--text-secondary)}
+.cmd-section{font-size:11px;color:var(--text-muted);white-space:nowrap}
+.highlight{background:var(--bg-warning);border-radius:2px}
+</style>
+
+<div class="container">
+<div class="header">
+  <h1>🌹 Rose Bot — Complete Reference</h1>
+  <p>Telegram Group Management Bot &nbsp;|&nbsp; All commands work with <code style="background:rgba(255,255,255,.2);border:none;color:#fff">/</code> or <code style="background:rgba(255,255,255,.2);border:none;color:#fff">!</code></p>
+</div>
+
+<div class="search-wrap">
+  <i class="ti ti-search" aria-hidden="true"></i>
+  <input type="text" id="search" placeholder="Search commands or features..." oninput="doSearch(this.value)">
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab active" onclick="showTab('basics')">Basics</button>
+  <button class="tab" onclick="showTab('admin')">Admin</button>
+  <button class="tab" onclick="showTab('antiflood')">Antiflood</button>
+  <button class="tab" onclick="showTab('antiraid')">AntiRaid</button>
+  <button class="tab" onclick="showTab('bans')">Bans & Mutes</button>
+  <button class="tab" onclick="showTab('blocklists')">Blocklists</button>
+  <button class="tab" onclick="showTab('captcha')">CAPTCHA</button>
+  <button class="tab" onclick="showTab('clean')">Clean</button>
+  <button class="tab" onclick="showTab('feds')">Federations</button>
+  <button class="tab" onclick="showTab('filters')">Filters</button>
+  <button class="tab" onclick="showTab('format')">Formatting</button>
+  <button class="tab" onclick="showTab('greetings')">Greetings</button>
+  <button class="tab" onclick="showTab('locks')">Locks</button>
+  <button class="tab" onclick="showTab('notes')">Notes</button>
+  <button class="tab" onclick="showTab('misc')">Misc & More</button>
+</div>
+
+<!-- ALL COMMANDS for search -->
+<div class="all-cmds" id="all-cmds"></div>
+
+<!-- SECTIONS -->
+
+<div class="section active" id="s-basics">
+<div class="section-title"><i class="ti ti-rocket" aria-hidden="true"></i>Basic Commands</div>
+<div class="card">
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/start</code></td><td>Start the bot</td></tr>
+<tr><td><code>/help</code></td><td>Show help message</td></tr>
+<tr><td><code>/donate</code></td><td>Info on how to support Rose</td></tr>
+<tr><td><code>/id</code></td><td>Get ID of user, group, or channel</td></tr>
+<tr><td><code>/info</code></td><td>Get a user's info</td></tr>
+<tr><td><code>/rules</code></td><td>Check the current chat rules</td></tr>
+<tr><td><code>/pinned</code></td><td>Get the current pinned message</td></tr>
+<tr><td><code>/report</code> or <code>@admin</code></td><td>Report a message to admins (reply to message)</td></tr>
+<tr><td><code>/kickme</code></td><td>Kick yourself from the group</td></tr>
+<tr><td><code>/runs</code></td><td>Random "run away" string</td></tr>
+<tr><td><code>/limits</code></td><td>Show bot limits</td></tr>
+<tr><td><code>/markdownhelp</code></td><td>Markdown help (PM only)</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<div class="section" id="s-admin">
+<div class="section-title"><i class="ti ti-shield" aria-hidden="true"></i>Admin Module</div>
+<div class="card">
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/promote &lt;user&gt;</code></td><td>Promote a user to admin</td></tr>
+<tr><td><code>/demote &lt;user&gt;</code></td><td>Demote a user</td></tr>
+<tr><td><code>/adminlist</code></td><td>List all admins in the chat</td></tr>
+<tr><td><code>/admincache</code></td><td>Force-refresh the admin cache</td></tr>
+<tr><td><code>/anonadmin &lt;yes/no&gt;</code></td><td>Allow anonymous admins to use commands (not recommended)</td></tr>
+<tr><td><code>/adminerror &lt;yes/no&gt;</code></td><td>Send error when non-admins use admin commands (default: on)</td></tr>
+</tbody></table>
+</div>
+<div class="note"><i class="ti ti-info-circle" aria-hidden="true"></i>Admin status is cached. Use <code>/admincache</code> to update immediately after manual changes.</div>
+<div class="card">
+<h3>Approval (trust users without making them admin)</h3>
+<table><thead><tr><th>Command</th><th>Who</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/approval</code></td><td><span class="tag tag-user">user</span></td><td>Check a user's approval status</td></tr>
+<tr><td><code>/approve</code></td><td><span class="tag tag-admin">admin</span></td><td>Approve user (bypasses locks, blocklists, antiflood)</td></tr>
+<tr><td><code>/unapprove</code></td><td><span class="tag tag-admin">admin</span></td><td>Remove approval from user</td></tr>
+<tr><td><code>/approved</code></td><td><span class="tag tag-admin">admin</span></td><td>List all approved users</td></tr>
+<tr><td><code>/unapproveall</code></td><td><span class="tag tag-admin">admin</span></td><td>Remove ALL approvals (cannot be undone)</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<div class="section" id="s-antiflood">
+<div class="section-title"><i class="ti ti-water" aria-hidden="true"></i>Antiflood</div>
+<div class="card">
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/flood</code></td><td>View current antiflood settings</td></tr>
+<tr><td><code>/setflood &lt;number/off&gt;</code></td><td>Set max consecutive messages before action triggers</td></tr>
+<tr><td><code>/setfloodtimer &lt;count&gt; &lt;duration&gt;</code></td><td>Timed antiflood (e.g. 10 messages in 30s)</td></tr>
+<tr><td><code>/floodmode &lt;action&gt;</code></td><td>Action: ban / mute / kick / tban / tmute</td></tr>
+<tr><td><code>/clearflood &lt;yes/no&gt;</code></td><td>Delete messages that triggered flood</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3>Examples</h3>
+<div class="example-block">/setflood 7           → trigger after 7 messages
+/setflood off         → disable antiflood
+/setfloodtimer 10 30s → trigger: 10 msgs in 30 seconds
+/setfloodtimer off    → disable timed antiflood
+/floodmode mute       → mute the flooder
+/floodmode tban 3d    → 3-day temp ban</div></div>
+</div>
+
+<div class="section" id="s-antiraid">
+<div class="section-title"><i class="ti ti-shield-lock" aria-hidden="true"></i>AntiRaid</div>
+<div class="card">
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/antiraid &lt;time/off&gt;</code></td><td>Toggle antiraid (temp-bans all new joins)</td></tr>
+<tr><td><code>/raidtime &lt;time&gt;</code></td><td>Antiraid duration (default: 6h)</td></tr>
+<tr><td><code>/raidactiontime &lt;time&gt;</code></td><td>How long new joins are temp-banned (default: 1h)</td></tr>
+<tr><td><code>/autoantiraid &lt;number/off&gt;</code></td><td>Auto-enable if X users join per minute</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3>Examples</h3>
+<div class="example-block">/antiraid 3h       → enable for 3 hours
+/antiraid off      → disable
+/autoantiraid 15   → auto-enable if 15+ join per minute
+/autoantiraid off  → disable auto antiraid</div></div>
+</div>
+
+<div class="section" id="s-bans">
+<div class="section-title"><i class="ti ti-ban" aria-hidden="true"></i>Bans, Mutes & Kicks</div>
+<div class="card">
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/ban</code></td><td>Ban a user</td></tr>
+<tr><td><code>/dban</code></td><td>Ban by reply + delete their message</td></tr>
+<tr><td><code>/sban</code></td><td>Silently ban (deletes your command too)</td></tr>
+<tr><td><code>/tban &lt;user&gt; &lt;time&gt;</code></td><td>Temporarily ban (4m, 3h, 6d, 5w)</td></tr>
+<tr><td><code>/unban</code></td><td>Unban a user</td></tr>
+<tr><td><code>/mute</code></td><td>Mute a user</td></tr>
+<tr><td><code>/dmute</code></td><td>Mute by reply + delete their message</td></tr>
+<tr><td><code>/smute</code></td><td>Silently mute</td></tr>
+<tr><td><code>/tmute &lt;user&gt; &lt;time&gt;</code></td><td>Temporarily mute</td></tr>
+<tr><td><code>/unmute</code></td><td>Unmute a user</td></tr>
+<tr><td><code>/kick</code></td><td>Kick a user</td></tr>
+<tr><td><code>/dkick</code></td><td>Kick by reply + delete their message</td></tr>
+<tr><td><code>/skick</code></td><td>Silently kick</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3>Examples</h3>
+<div class="example-block">/tmute @username 2h   → mute for 2 hours
+/sban 1234 2h         → silently ban user ID 1234 for 2 hours
+/tban @user 3d        → ban for 3 days</div></div>
+<div class="card"><h3>Warnings</h3>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/warn &lt;reason&gt;</code></td><td>Warn a user</td></tr>
+<tr><td><code>/dwarn</code></td><td>Warn by reply + delete message</td></tr>
+<tr><td><code>/swarn</code></td><td>Silently warn</td></tr>
+<tr><td><code>/warns</code></td><td>See a user's warnings</td></tr>
+<tr><td><code>/rmwarn</code></td><td>Remove latest warning</td></tr>
+<tr><td><code>/resetwarn</code></td><td>Reset user's warnings to 0</td></tr>
+<tr><td><code>/resetallwarns</code></td><td>Reset ALL users' warnings</td></tr>
+<tr><td><code>/warnmode &lt;action&gt;</code></td><td>ban / mute / kick / tban / tmute</td></tr>
+<tr><td><code>/warnlimit &lt;number&gt;</code></td><td>Warnings before action triggers</td></tr>
+<tr><td><code>/warntime &lt;time&gt;</code></td><td>How long warnings last (off = never expire)</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<div class="section" id="s-blocklists">
+<div class="section-title"><i class="ti ti-list-check" aria-hidden="true"></i>Blocklists</div>
+<div class="card">
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/addblocklist &lt;trigger&gt; &lt;reason&gt;</code></td><td>Add a blocklist trigger</td></tr>
+<tr><td><code>/rmblocklist &lt;trigger&gt;</code></td><td>Remove a trigger</td></tr>
+<tr><td><code>/unblocklistall</code></td><td>Remove ALL triggers (creator only)</td></tr>
+<tr><td><code>/blocklist</code></td><td>List all blocked items</td></tr>
+<tr><td><code>/blocklistmode &lt;mode&gt;</code></td><td>nothing / ban / mute / kick / warn / tban / tmute</td></tr>
+<tr><td><code>/blocklistdelete &lt;yes/no&gt;</code></td><td>Delete blocklisted messages (default: on)</td></tr>
+<tr><td><code>/setblocklistreason</code></td><td>Set default blocklist warning reason</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3>Pattern Modifiers</h3>
+<table><thead><tr><th>Pattern</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>?</code></td><td>Any single non-whitespace character</td></tr>
+<tr><td><code>*</code></td><td>Any number of non-whitespace characters</td></tr>
+<tr><td><code>**</code></td><td>Any number of characters including spaces</td></tr>
+<tr><td><code>exact:word</code></td><td>Only matches exact word, not "word here"</td></tr>
+<tr><td><code>prefix:word</code></td><td>Matches messages starting with "word"</td></tr>
+<tr><td><code>lookalike:word</code></td><td>Matches visually similar chars (e.g. Cyrillic)</td></tr>
+<tr><td><code>file:*.zip</code></td><td>Match file extensions</td></tr>
+<tr><td><code>inline:@gif</code></td><td>Match inline bot usage</td></tr>
+<tr><td><code>forward:@channel</code></td><td>Match forwards from a channel</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3>Override Tags (add to reason)</h3>
+<div class="example-block">{ban} {mute 6h} {tmute 6h} {warn} {skick} {sban}  → custom action
+{nodel}   → prevent deletion for this trigger
+{del}     → force deletion even if blocklistdelete is off
+
+Examples:
+/blocklistmode warn
+/addblocklist boo Don't scare the ghosts! {tmute 6h}
+/addblocklist "the admins suck" Respect your admins!
+/addblocklist (hi, hey, hello) Stop saying hello!
+/addblocklist "bit.ly/*" We dont like shorteners!
+/addblocklist "follow ** X" No promoting X accounts!
+/addblocklist "exact:hi" Only matches just 'hi'
+/addblocklist "lookalike:bot" Matches 'bot' + lookalikes
+/addblocklist "file:*.zip" zip files not allowed!
+/addblocklist "inline:@gif" gif bot not allowed!
+/addblocklist "forward:@botnews" channel not allowed!</div></div>
+</div>
+
+<div class="section" id="s-captcha">
+<div class="section-title"><i class="ti ti-robot" aria-hidden="true"></i>CAPTCHA</div>
+<div class="card">
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/captcha &lt;yes/no&gt;</code></td><td>Enable/disable CAPTCHA for new joins</td></tr>
+<tr><td><code>/captchamode &lt;button/math/text/text2&gt;</code></td><td>Choose CAPTCHA type</td></tr>
+<tr><td><code>/captcharules &lt;yes/no&gt;</code></td><td>Require users to accept rules before speaking</td></tr>
+<tr><td><code>/captchamutetime &lt;time&gt;</code></td><td>Auto-unmute after X time (off = stay muted until solved)</td></tr>
+<tr><td><code>/captchakick &lt;yes/no&gt;</code></td><td>Kick users who haven't solved CAPTCHA</td></tr>
+<tr><td><code>/captchakicktime &lt;time&gt;</code></td><td>Time after which to kick unsolved users</td></tr>
+<tr><td><code>/setcaptchatext &lt;text&gt;</code></td><td>Customize CAPTCHA button text</td></tr>
+<tr><td><code>/resetcaptchatext</code></td><td>Reset CAPTCHA button to default</td></tr>
+</tbody></table>
+</div>
+<div class="note"><i class="ti ti-alert-triangle" aria-hidden="true"></i>CAPTCHA requires welcome messages to be enabled. Disabling welcome also disables CAPTCHA.</div>
+</div>
+
+<div class="section" id="s-clean">
+<div class="section-title"><i class="ti ti-sparkles" aria-hidden="true"></i>Clean Commands & Services</div>
+<div class="card"><h3>Clean Commands</h3>
+<p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px">Auto-delete command messages to keep chat clean.</p>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/cleancommand &lt;type&gt;</code></td><td>Start deleting this command type</td></tr>
+<tr><td><code>/keepcommand &lt;type&gt;</code></td><td>Stop deleting this command type</td></tr>
+<tr><td><code>/cleancommandtypes</code></td><td>List available types</td></tr>
+</tbody></table>
+<p style="font-size:12px;margin-top:8px;color:var(--text-muted)">Types: <code>all</code> <code>admin</code> <code>user</code> <code>other</code></p>
+</div>
+<div class="card"><h3>Clean Service Messages</h3>
+<p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px">Delete Telegram's automatic service messages.</p>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/cleanservice &lt;type/yes/no&gt;</code></td><td>Start deleting this service type</td></tr>
+<tr><td><code>/keepservice &lt;type&gt;</code></td><td>Stop deleting this type</td></tr>
+<tr><td><code>/cleanservicetypes</code></td><td>List all available types</td></tr>
+</tbody></table>
+<p style="font-size:12px;margin-top:8px;color:var(--text-muted)">Types: <code>all</code> <code>join</code> <code>leave</code> <code>pin</code> <code>title</code> <code>photo</code> <code>videochat</code> <code>other</code></p>
+</div>
+<div class="card"><h3>Purges</h3>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/purge</code></td><td>Delete all messages from replied-to until now</td></tr>
+<tr><td><code>/purge &lt;X&gt;</code></td><td>Delete next X messages after replied-to message</td></tr>
+<tr><td><code>/spurge</code></td><td>Same as purge, no confirmation message</td></tr>
+<tr><td><code>/del</code></td><td>Delete the replied-to message</td></tr>
+<tr><td><code>/purgefrom</code></td><td>Mark start of purge range (reply to message)</td></tr>
+<tr><td><code>/purgeto</code></td><td>Purge everything between /purgefrom and here</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<div class="section" id="s-feds">
+<div class="section-title"><i class="ti ti-network" aria-hidden="true"></i>Federations</div>
+<div class="card"><h3>Fed Owner Commands <span class="tag tag-owner">owner</span></h3>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/newfed &lt;name&gt;</code></td><td>Create a new federation</td></tr>
+<tr><td><code>/renamefed &lt;name&gt;</code></td><td>Rename your federation</td></tr>
+<tr><td><code>/delfed</code></td><td>Delete your federation</td></tr>
+<tr><td><code>/fedtransfer &lt;user&gt;</code></td><td>Transfer ownership</td></tr>
+<tr><td><code>/fedpromote &lt;user&gt;</code></td><td>Promote to fed admin</td></tr>
+<tr><td><code>/feddemote &lt;user&gt;</code></td><td>Demote a fed admin</td></tr>
+<tr><td><code>/subfed &lt;FedID&gt;</code></td><td>Subscribe to another fed's bans</td></tr>
+<tr><td><code>/unsubfed &lt;FedID&gt;</code></td><td>Unsubscribe</td></tr>
+<tr><td><code>/fedexport &lt;format&gt;</code></td><td>Export ban list (csv/json/human)</td></tr>
+<tr><td><code>/fedimport &lt;overwrite/keep&gt; &lt;format&gt;</code></td><td>Import ban list</td></tr>
+<tr><td><code>/setfedlog</code></td><td>Set current chat as fed log</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3>Fed Admin Commands <span class="tag tag-admin">admin</span></h3>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/fban</code></td><td>Ban a user from the federation</td></tr>
+<tr><td><code>/unfban</code></td><td>Unban a user from the federation</td></tr>
+<tr><td><code>/myfeds</code></td><td>List all feds you admin</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3>User Commands <span class="tag tag-user">user</span></h3>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/fedinfo &lt;FedID&gt;</code></td><td>Info about a federation</td></tr>
+<tr><td><code>/fedstat</code></td><td>Your ban status across all feds</td></tr>
+<tr><td><code>/joinfed &lt;FedID&gt;</code></td><td>Join chat to a federation (owner only)</td></tr>
+<tr><td><code>/leavefed</code></td><td>Leave federation (owner only)</td></tr>
+<tr><td><code>/chatfed</code></td><td>Info about this chat's federation</td></tr>
+<tr><td><code>/quietfed &lt;yes/no&gt;</code></td><td>Suppress ban notifications</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<div class="section" id="s-filters">
+<div class="section-title"><i class="ti ti-message-reply" aria-hidden="true"></i>Filters</div>
+<div class="card">
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/filter &lt;trigger&gt; &lt;reply&gt;</code></td><td>Add a filter (bot replies when trigger is said)</td></tr>
+<tr><td><code>/filters</code></td><td>List all chat filters</td></tr>
+<tr><td><code>/stop &lt;trigger&gt;</code></td><td>Remove a filter</td></tr>
+<tr><td><code>/stopall</code></td><td>Remove ALL filters (cannot be undone)</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3>Filter Special Tags</h3>
+<table><thead><tr><th>Tag</th><th>Effect</th></tr></thead><tbody>
+<tr><td><code>{admin}</code></td><td>Only triggers for admins</td></tr>
+<tr><td><code>{user}</code></td><td>Only triggers for non-admins</td></tr>
+<tr><td><code>{allow_bot}</code></td><td>Allow other bots to trigger this filter</td></tr>
+<tr><td><code>{protect}</code></td><td>Reply cannot be forwarded/screenshotted</td></tr>
+<tr><td><code>{replytag}</code></td><td>Reply to the person being replied to, not sender</td></tr>
+<tr><td><code>"exact:trigger"</code></td><td>Trigger only if message is exactly this</td></tr>
+<tr><td><code>"prefix:trigger"</code></td><td>Trigger if message starts with this</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3>Examples</h3>
+<div class="example-block">/filter hello Hello there! How are you?
+/filter hello Hello {first}! How are you?
+/filter "hello friend" Hello back! Long time no see!
+/filter (hi, hey, hello, "hi there") Hello back!
+
+Random replies (use %%% separator):
+/filter hi
+Hello!
+%%%
+Hey there!
+%%%
+What's up?
+
+Force {user} filter as admin: trigger force
+Get unformatted: trigger noformat</div></div>
+</div>
+
+<div class="section" id="s-format">
+<div class="section-title"><i class="ti ti-text-size" aria-hidden="true"></i>Formatting</div>
+<div class="card"><h3>Markdown</h3>
+<table><thead><tr><th>Syntax</th><th>Result</th></tr></thead><tbody>
+<tr><td><code>`code`</code></td><td>monospace</td></tr>
+<tr><td><code>_italic_</code></td><td><em>italic</em></td></tr>
+<tr><td><code>*bold*</code></td><td><strong>bold</strong></td></tr>
+<tr><td><code>~strikethrough~</code></td><td><s>strikethrough</s></td></tr>
+<tr><td><code>__underline__</code></td><td><u>underline</u></td></tr>
+<tr><td><code>||spoiler||</code></td><td>spoiler</td></tr>
+<tr><td><code>[text](url)</code></td><td>hyperlink</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3>Buttons</h3>
+<div class="example-block">[Button Name](buttonurl://url)              → simple button
+[Btn 1](buttonurl://url)
+[Btn 2](buttonurl://url:same)              → same row as Btn 1
+[Note Btn](buttonurl://#notename)          → opens a note in PM
+[Styled](buttonurl#primary://url)          → primary(blue) | danger(red) | success(green)</div>
+</div>
+<div class="card"><h3>Fillings (Dynamic Variables)</h3>
+<table><thead><tr><th>Filling</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>{first}</code></td><td>User's first name</td></tr>
+<tr><td><code>{last}</code></td><td>User's last name</td></tr>
+<tr><td><code>{fullname}</code></td><td>User's full name</td></tr>
+<tr><td><code>{username}</code></td><td>Username (or mention if none)</td></tr>
+<tr><td><code>{mention}</code></td><td>Mention user with first name</td></tr>
+<tr><td><code>{id}</code></td><td>User's ID</td></tr>
+<tr><td><code>{chatname}</code></td><td>Chat's name</td></tr>
+<tr><td><code>{rules}</code></td><td>Button to chat rules (new row)</td></tr>
+<tr><td><code>{rules:same}</code></td><td>Button to chat rules (same row)</td></tr>
+<tr><td><code>{preview}</code></td><td>Enable link preview</td></tr>
+<tr><td><code>{preview:top}</code></td><td>Show link preview above text</td></tr>
+<tr><td><code>{nonotif}</code></td><td>Send without notification</td></tr>
+<tr><td><code>{protect}</code></td><td>Prevent forwarding/screenshotting</td></tr>
+<tr><td><code>{mediaspoiler}</code></td><td>Mark photo/video as spoiler</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3>Random Content (%%% separator)</h3>
+<div class="example-block">Use %%% to separate random replies:
+
+/setwelcome
+hello there {first}!
+%%%
+Ooooh, {first} is in the house!
+%%%
+Welcome to the group, {first}!
+
+→ Bot picks one randomly each time. Works in notes, filters, greetings.</div>
+</div>
+</div>
+
+<div class="section" id="s-greetings">
+<div class="section-title"><i class="ti ti-door-enter" aria-hidden="true"></i>Greetings & Rules</div>
+<div class="card"><h3>Welcome & Goodbye</h3>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/welcome &lt;yes/no&gt;</code></td><td>Enable/disable welcome messages</td></tr>
+<tr><td><code>/goodbye &lt;yes/no&gt;</code></td><td>Enable/disable goodbye messages</td></tr>
+<tr><td><code>/setwelcome &lt;text&gt;</code></td><td>Set custom welcome message</td></tr>
+<tr><td><code>/resetwelcome</code></td><td>Reset welcome to default</td></tr>
+<tr><td><code>/setgoodbye &lt;text&gt;</code></td><td>Set custom goodbye message</td></tr>
+<tr><td><code>/resetgoodbye</code></td><td>Reset goodbye to default</td></tr>
+<tr><td><code>/cleanwelcome &lt;yes/no&gt;</code></td><td>Auto-delete old welcome after 5 mins or on new join</td></tr>
+<tr><td><code>/welcome noformat</code></td><td>View welcome without formatting (for editing)</td></tr>
+</tbody></table>
+<div class="note"><i class="ti ti-info-circle" aria-hidden="true"></i>Goodbye messages not sent in groups with 50+ members. To welcome with media, reply to the media with /setwelcome.</div>
+</div>
+<div class="card"><h3>Rules</h3>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/rules</code></td><td>View chat rules</td></tr>
+<tr><td><code>/setrules &lt;text&gt;</code></td><td>Set chat rules</td></tr>
+<tr><td><code>/privaterules &lt;yes/no&gt;</code></td><td>Send rules in PM</td></tr>
+<tr><td><code>/resetrules</code></td><td>Reset rules</td></tr>
+<tr><td><code>/setrulesbutton &lt;text&gt;</code></td><td>Custom name for rules button</td></tr>
+<tr><td><code>/resetrulesbutton</code></td><td>Reset rules button name</td></tr>
+<tr><td><code>/rules noformat</code></td><td>View unformatted rules</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<div class="section" id="s-locks">
+<div class="section-title"><i class="ti ti-lock" aria-hidden="true"></i>Locks</div>
+<div class="card">
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/lock &lt;type(s)&gt;</code></td><td>Lock one or more content types</td></tr>
+<tr><td><code>/unlock &lt;type(s)&gt;</code></td><td>Unlock content types</td></tr>
+<tr><td><code>/locks</code></td><td>List currently locked items</td></tr>
+<tr><td><code>/lockwarns &lt;yes/no&gt;</code></td><td>Warn users when they use a locked type</td></tr>
+<tr><td><code>/locktypes</code></td><td>Show all lockable types</td></tr>
+<tr><td><code>/allowlist &lt;url/id/@username&gt;</code></td><td>Allowlist a URL, channel, bot, sticker pack, etc.</td></tr>
+<tr><td><code>/rmallowlist &lt;item&gt;</code></td><td>Remove from allowlist</td></tr>
+<tr><td><code>/rmallowlistall</code></td><td>Clear entire allowlist</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3>Custom Lock Action</h3>
+<div class="example-block">/lock invitelink ### no promoting other chats {ban}
+/lock sticker photo gif video    → lock multiple at once
+/lock emoji ###                  → reset custom action
+/lock all ###                    → reset all custom actions
+/locks list                      → list all locks
+
+Allowlist examples:
+/allowlist @RoseSupport
+/allowlist t.me/addstickers/Pinup_Girl
+(replying to message) /allowlist emojipack:<></div></div>
+<div class="card"><h3>All Lock Types</h3>
+<div style="display:flex;flex-wrap:wrap;gap:4px;line-height:1.8">
+<code>all</code><code>album</code><code>anonchannel</code><code>audio</code><code>bot</code><code>botlink</code>
+<code>button</code><code>cashtag</code><code>checklist</code><code>cjk</code><code>collage</code><code>command</code>
+<code>comment</code><code>contact</code><code>cyrillic</code><code>document</code><code>email</code><code>emoji</code>
+<code>emojicustom</code><code>emojigame</code><code>emojionly</code><code>externalreply</code><code>forward</code>
+<code>forwardbot</code><code>forwardchannel</code><code>forwardstory</code><code>forwarduser</code><code>game</code>
+<code>gif</code><code>guestbot</code><code>inline</code><code>invitelink</code><code>location</code><code>outsidereaction</code>
+<code>phone</code><code>photo</code><code>poll</code><code>reaction</code><code>richmessage</code><code>rtl</code>
+<code>slideshow</code><code>spoiler</code><code>sticker</code><code>stickeranimated</code><code>stickerpremium</code>
+<code>text</code><code>url</code><code>video</code><code>videonote</code><code>voice</code><code>zalgo</code>
+</div></div>
+</div>
+
+<div class="section" id="s-notes">
+<div class="section-title"><i class="ti ti-notes" aria-hidden="true"></i>Notes & Pins</div>
+<div class="card"><h3>Notes</h3>
+<table><thead><tr><th>Command</th><th>Who</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/get &lt;notename&gt;</code> or <code>#notename</code></td><td><span class="tag tag-user">user</span></td><td>Retrieve a note</td></tr>
+<tr><td><code>/save &lt;notename&gt; &lt;text&gt;</code></td><td><span class="tag tag-admin">admin</span></td><td>Save a new note (reply to save media)</td></tr>
+<tr><td><code>/clear &lt;notename&gt;</code></td><td><span class="tag tag-admin">admin</span></td><td>Delete a note</td></tr>
+<tr><td><code>/notes</code> or <code>/saved</code></td><td><span class="tag tag-admin">admin</span></td><td>List all notes</td></tr>
+<tr><td><code>/clearall</code></td><td><span class="tag tag-admin">admin</span></td><td>Delete ALL notes (cannot be undone)</td></tr>
+<tr><td><code>/privatenotes &lt;yes/no&gt;</code></td><td><span class="tag tag-admin">admin</span></td><td>Send notes in PM instead of group</td></tr>
+</tbody></table>
+<div class="example-block">/save test This is a fancy note!
+#test                         → retrieve the note
+/get notename noformat        → get unformatted for editing
+/save example Note {admin}    → admin-only note
+/save example Note {protect}  → protected note
+/save test PM-only note {private}
+/save test Group note {noprivate}</div>
+</div>
+<div class="card"><h3>Pins</h3>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/pinned</code></td><td>Get current pinned message</td></tr>
+<tr><td><code>/pin</code></td><td>Pin replied-to message (silently)</td></tr>
+<tr><td><code>/pin loud</code></td><td>Pin with notification</td></tr>
+<tr><td><code>/permapin &lt;text&gt;</code></td><td>Pin a custom message via bot</td></tr>
+<tr><td><code>/unpin</code></td><td>Unpin current (or replied-to) message</td></tr>
+<tr><td><code>/unpinall</code></td><td>Unpin ALL messages</td></tr>
+<tr><td><code>/antichannelpin &lt;yes/no&gt;</code></td><td>Stop Telegram auto-pinning linked channel</td></tr>
+<tr><td><code>/cleanlinked &lt;yes/no&gt;</code></td><td>Delete messages sent by linked channel</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<div class="section" id="s-misc">
+<div class="section-title"><i class="ti ti-dots" aria-hidden="true"></i>Misc & Advanced</div>
+<div class="card"><h3>Connections</h3>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/connect &lt;chatid/username&gt;</code></td><td>Connect to a chat's database from DM</td></tr>
+<tr><td><code>/disconnect</code></td><td>Disconnect</td></tr>
+<tr><td><code>/reconnect</code></td><td>Reconnect to previously connected chat</td></tr>
+<tr><td><code>/connection</code></td><td>Info about current connection</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3>Disabling Commands</h3>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/disable &lt;command&gt;</code></td><td>Disable a command for non-admins</td></tr>
+<tr><td><code>/enable &lt;command&gt;</code></td><td>Re-enable a command</td></tr>
+<tr><td><code>/disableable</code></td><td>List all disableable commands</td></tr>
+<tr><td><code>/disabledel &lt;yes/no&gt;</code></td><td>Auto-delete disabled commands when used</td></tr>
+<tr><td><code>/disableadmin &lt;yes/no&gt;</code></td><td>Also disable for admins</td></tr>
+<tr><td><code>/disabled</code></td><td>List currently disabled commands</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3>Log Channels</h3>
+<p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px">Setup: 1. Add Rose to channel as admin → 2. Send /setlog in channel → 3. Forward to your group</p>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/logchannel</code></td><td>Get current log channel name</td></tr>
+<tr><td><code>/setlog</code></td><td>Set the log channel</td></tr>
+<tr><td><code>/unsetlog</code></td><td>Remove the log channel</td></tr>
+<tr><td><code>/log &lt;category&gt;</code></td><td>Enable a log category</td></tr>
+<tr><td><code>/nolog &lt;category&gt;</code></td><td>Disable a log category</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3>Import / Export</h3>
+<table><thead><tr><th>Command</th><th>Who</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/export</code></td><td><span class="tag tag-admin">admin</span></td><td>Export all chat data to JSON</td></tr>
+<tr><td><code>/import</code></td><td><span class="tag tag-owner">creator</span></td><td>Import settings from JSON file</td></tr>
+<tr><td><code>/reset</code></td><td><span class="tag tag-owner">creator</span></td><td>Reset ALL chat settings</td></tr>
+</tbody></table>
+<div class="example-block">/export notes filters      → export only those modules
+/import rules greetings    → import only those modules</div>
+</div>
+<div class="card"><h3>Advanced: Silent Actions</h3>
+<p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px">Requires log channel. Available: sban / smute / skick / swarn</p>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/silentactions &lt;yes/no&gt;</code></td><td>Enable/disable silent action features</td></tr>
+</tbody></table>
+<div class="example-block">/lock anonchannel ### This chat is for users only {sban}
+/addblocklist "yarrr" No pirates here! {skick}
+/addblocklist "fight club" Shhh! {smute 12h}
+/setfloodmode sban 1h</div>
+</div>
+<div class="card"><h3>Advanced: Bot-to-Bot</h3>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/bot2bot &lt;off/admin/all&gt;</code></td><td>Set which bots can use Rose's commands</td></tr>
+<tr><td><code>/bot2botskipreview &lt;yes/no&gt;</code></td><td>Skip human review of bot commands</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3>Topics</h3>
+<table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>/newtopic &lt;name&gt;</code></td><td>Create a new topic</td></tr>
+<tr><td><code>/renametopic &lt;name&gt;</code></td><td>Rename current topic</td></tr>
+<tr><td><code>/closetopic</code></td><td>Close current topic</td></tr>
+<tr><td><code>/reopentopic</code></td><td>Reopen closed topic</td></tr>
+<tr><td><code>/deletetopic</code></td><td>Delete topic + all messages (cannot be undone)</td></tr>
+<tr><td><code>/setactiontopic</code></td><td>Set current topic as default action topic</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3>Languages</h3>
+<p style="font-size:13px;color:var(--text-secondary);margin-bottom:6px"><code>/setlang &lt;code&gt;</code> — Available: AR, AZ, BE, BG, CA, DE, EL, EN-GB, EN-PT, ES, FA, FI, FR, HE, HI, HU, ID, IT, KO, ML-IN, MS, NL, PL, PT, PT-BR, RU, SR, TA, TR, UK, UZ, VI, ZH-CN, ZH-TW</p>
+</div>
+<div class="card"><h3>Reports</h3>
+<p style="font-size:13px;color:var(--text-secondary)"><code>/report</code> or <code>@admin</code> — Reply to a message to report it. Use <code>/reports &lt;yes/no&gt;</code> to enable/disable. Admins cannot report or be reported.</p>
+</div>
+<div class="card"><h3>Privacy</h3>
+<p style="font-size:13px;color:var(--text-secondary)"><code>/privacy</code> — View privacy policy and manage your data (PM only)</p>
+</div>
+</div>
+
+</div><!-- end container -->
+
+<script>
+const tabs = {
+  'basics': 's-basics', 'admin': 's-admin', 'antiflood': 's-antiflood',
+  'antiraid': 's-antiraid', 'bans': 's-bans', 'blocklists': 's-blocklists',
+  'captcha': 's-captcha', 'clean': 's-clean', 'feds': 's-feds',
+  'filters': 's-filters', 'format': 's-format', 'greetings': 's-greetings',
+  'locks': 's-locks', 'notes': 's-notes', 'misc': 's-misc'
+};
+let currentTab = 'basics';
+
+function showTab(key) {
+  currentTab = key;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const s = document.getElementById(tabs[key]);
+  if (s) s.classList.add('active');
+  event && event.target && event.target.classList.add('active');
+  document.getElementById('all-cmds').style.display = 'none';
+  document.getElementById('search').value = '';
+}
+
+function doSearch(q) {
+  q = q.trim().toLowerCase();
+  const allCmds = document.getElementById('all-cmds');
+  if (!q) {
+    allCmds.style.display = 'none';
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(tabs[currentTab]).classList.add('active');
+    return;
+  }
+  allCmds.style.display = 'block';
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+  const allRows = document.querySelectorAll('.section tr');
+  let results = [];
+  allRows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (!cells.length) return;
+    const text = row.innerText.toLowerCase();
+    if (text.includes(q)) {
+      const sectionEl = row.closest('.section');
+      const sectionTitle = sectionEl ? sectionEl.querySelector('.section-title') : null;
+      const sName = sectionTitle ? sectionTitle.innerText.replace(/[^\w\s]/g,'').trim() : '';
+      results.push({
+        cmd: cells[0] ? cells[0].innerText : '',
+        desc: cells[cells.length-1] ? cells[cells.length-1].innerText : '',
+        section: sName
+      });
+    }
+  });
+
+  if (!results.length) {
+    allCmds.innerHTML = '<div class="empty"><i class="ti ti-search" style="font-size:32px;display:block;margin-bottom:8px" aria-hidden="true"></i>No results for "' + q + '"</div>';
+    return;
+  }
+
+  let html = '<div class="card">';
+  results.forEach(r => {
+    const hl = (txt) => txt.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi'), '<mark class="highlight">$1</mark>');
+    html += `<div class="cmd-row"><div class="cmd-name">${hl(r.cmd)}</div><div class="cmd-desc">${hl(r.desc)}</div><div class="cmd-section">${r.section}</div></div>`;
+  });
+  html += '</div>';
+  allCmds.innerHTML = html;
+}
+</script>
